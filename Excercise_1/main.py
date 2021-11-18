@@ -1,6 +1,5 @@
-from computing import *
-from plotting import *
-from reconstruction import *
+from Excercise_1.Functions.computing import *
+from Excercise_1.Functions.reconstruction import *
 
 #dataset = "mnist.npz"
 dataset = 'olivetti.npz'
