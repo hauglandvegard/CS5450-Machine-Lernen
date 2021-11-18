@@ -13,13 +13,10 @@ def prepare(dataset, n_patches, patch_size):
 
     # Taking the square root of the amount of pixels to find width and height because
     # we know that the image is squared
-
     img_height = int(np.sqrt(n_pixels))
     img_width = int(np.sqrt(n_pixels))
 
-    assert isinstance(img_height, int) and isinstance(img_width, int), "Image dimensions need to be integers."
-
-    # Adding a dimention to the matrix such that you can construct an image
+    # Adding a dimension to the matrix such that you can construct an image
     images = np.reshape(matrix, (n_images, img_height, img_width))
 
     # Enforcing mean-free data vectors
@@ -34,27 +31,30 @@ def prepare(dataset, n_patches, patch_size):
 
     return n_pixels, patches
 
-def applyMethod(method, patches, n_basis, n_pixels):
+def applyMethod(method, patches, n_basis, n_pixels, n_iterations):
     if method == 'pca':
         pca = PCA(n_components=min(n_basis, n_pixels))
-        pca.fit(patches)
+        pca.fit_transform(patches)
         basis = pca.components_
 
-        per_var = np.round(pca.explained_variance_ratio_ * 100, decimals=1)
-        labels = ['PC' + str(x) for x in range(1, len(per_var) + 1)]
-
-        plt.bar(x=range(1, len(per_var) + 1), height=per_var, tick_label=labels)
-        plt.ylabel('Precentage of Explained Varriance')
-        plt.xlabel('Princial Component')
-        plt.title('Scree Plot')
-        plt.show()
-
-        return patches
+        print(basis)
+        return basis, pca
 
     elif method == 'ica':
-        basis = -1
+        ica = FastICA(n_components=min(n_basis, n_pixels))
+        ica.fit_transform(patches)
+        basis = ica.components_
+
+        return basis, ica
+
     elif method == 'sc':
-        basis = -1
+        dic_learning = DictionaryLearning(n_components=min(n_basis, n_pixels),
+                                          verbose=True,
+                                          max_iter=n_iterations)
+        dic_learning.fit_transform(patches)
+        basis = dic_learning.components_
+
+        return basis, dic_learning
 
 # TODO show the new set of basis vectors (only the first n_basis)
 # show_in_grid(basis[:n_basis], patch_size, patch_size)
